@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majlis-e-Zehanat v5.0: Next-Gen Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --accent-main: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.45);
+            --border-glow: #059669;
+            --text-accent: #34d399;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            overflow-x: hidden;
+        }
+
+        .bg-theme-glass { 
+            background: rgba(11, 20, 32, 0.88); 
+            backdrop-filter: blur(28px); 
+            -webkit-backdrop-filter: blur(28px);
+        }
+
+        /* Dynamic Themes */
+        .theme-islamic {
+            --accent-main: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.45);
+            --border-glow: #059669;
+            --text-accent: #34d399;
+        }
+        .theme-logical {
+            --accent-main: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.45);
+            --border-glow: #0284c7;
+            --text-accent: #38bdf8;
+        }
+        .theme-pakistani {
+            --accent-main: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.45);
+            --border-glow: #d97706;
+            --text-accent: #fbbf24;
+        }
+
+        .dynamic-glow-bg {
+            background: radial-gradient(circle at 50% 15%, var(--accent-glow, rgba(16, 185, 129, 0.35)) 0%, rgba(3, 7, 18, 0.98) 75%);
+            transition: background 0.8s ease-in-out;
+        }
+
+        .glow-card {
+            box-shadow: 0 0 50px -10px var(--accent-glow, rgba(16, 185, 129, 0.35)), 0 0 30px rgba(0,0,0,0.95);
+            border: 1px solid var(--border-glow, rgba(16, 185, 129, 0.4));
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Gravity Flip Effect */
+        .quiz-flip-container {
+            perspective: 1000px;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .quiz-upside-down {
+            transform: rotateX(180deg) rotateZ(180deg) scale(0.95);
+            filter: hue-rotate(180deg) contrast(1.1);
+        }
+
+        /* Magic Crystal Ball & Orb Animations */
+        @keyframes magicSpin {
+            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 15px #38bdf8); }
+            50% { transform: rotate(180deg) scale(1.15); filter: drop-shadow(0 0 35px #f59e0b); }
+            100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 15px #10b981); }
+        }
+        .animate-magic-spin {
+            animation: magicSpin 3s infinite ease-in-out;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { box-shadow: 0 0 25px #10b981, inset 0 0 15px #38bdf8; }
+            50% { box-shadow: 0 0 65px #f59e0b, inset 0 0 35px #ec4899; }
+        }
+        .magic-orb-container {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #38bdf8 30%, #0284c7 60%, #090d16 100%);
+            animation: orbPulse 2.5s infinite ease-in-out;
+            cursor: pointer;
+        }
+
+        #spaceCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .option-card-hover {
+            transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .option-card-hover:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.01);
+            border-color: var(--accent-main);
+            box-shadow: 0 8px 25px -5px var(--accent-glow);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-main, #38bdf8); }
+    </style>
+</head>
+<body id="mainBody" class="h-full bg-slate-950 text-slate-100 flex flex-col justify-between theme-islamic dynamic-glow-bg min-h-screen relative z-10 select-none">
+
+    <canvas id="spaceCanvas"></canvas>
+
+    <!-- Navigation Header Bar -->
+    <header class="w-full py-3.5 px-4 sm:px-6 border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-xl sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 shadow-2xl">
+        <div class="flex items-center space-x-3 cursor-pointer group" onclick="app.goHome()">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-emerald-500 to-amber-500 flex items-center justify-center shadow-lg text-slate-950 font-black text-xl transform group-hover:scale-105 transition">
+                💎
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <h1 class="font-black text-base sm:text-lg tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
+                        Majlis-e-Zehanat
+                    </h1>
+                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-cyan-950/90 border border-cyan-500/40 text-cyan-300 font-extrabold uppercase tracking-wider whitespace-nowrap shadow-inner">v5.0 Next-Gen</span>
+                    <span class="text-[10px] text-slate-500 font-semibold italic hidden sm:inline">by Fahad</span>
+                </div>
+                <p class="text-[10px] text-slate-400 font-medium tracking-wide">Perfection & Wit Matrix • Global Public Edition</p>
+            </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center space-x-2 sm:space-x-2.5">
+            <button onclick="app.openCustomQuizModal()" class="px-3 py-2 rounded-xl bg-purple-950/70 hover:bg-purple-900/90 text-purple-300 text-xs font-bold border border-purple-500/40 transition flex items-center space-x-1.5 shadow-md active:scale-95">
+                <span class="text-amber-300">⚡</span> <span class="hidden md:inline">3-Q Blitz</span>
+            </button>
+
+            <button onclick="app.openWarmupModal()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 text-xs font-bold border border-cyan-500/40 transition flex items-center space-x-1.5 shadow-md active:scale-95">
+                <span>🧩</span> <span class="hidden md:inline">Warmup</span>
+            </button>
+
+            <button onclick="app.toggleSound()" id="soundToggleBtn" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700/80 transition flex items-center space-x-1 shadow-md active:scale-95">
+                <span id="soundIcon">🔊</span> <span id="soundStatus" class="hidden sm:inline">Sound On</span>
+            </button>
+
+            <button onclick="app.openLeaderboard()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs transition shadow-lg shadow-amber-500/25 flex items-center space-x-1.5 transform hover:-translate-y-0.5 active:translate-y-0">
+                <span>🏆</span> <span class="font-black">Leaderboard</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container Wrapper -->
+    <main id="mainContainerWrapper" class="flex-1 flex items-center justify-center p-4 sm:p-6 max-w-4xl mx-auto w-full my-auto z-10 transition-transform">
+
+        <!-- VIEW 1: HOME & PROFILE SELECTION -->
+        <div id="homeView" class="w-full max-w-xl bg-theme-glass rounded-3xl p-6 sm:p-10 shadow-2xl glow-card relative overflow-hidden transition-all duration-500">
+            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-500 animate-pulse"></div>
+            
+            <div class="text-center mb-8">
+                <div class="inline-flex flex-col items-center p-3 px-6 rounded-2xl bg-slate-950/90 border border-emerald-500/40 shadow-inner mb-4">
+                    <span class="text-xs sm:text-sm font-extrabold text-emerald-400 tracking-wider uppercase">
+                        In the name of Allah, the Most Gracious, the Most Merciful
+                    </span>
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-100 mb-2 tracking-tight">Are You The Brightest Mind in the Room? 🧠</h2>
+                <p id="humorTagline" class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-md mx-auto font-medium italic">
+                    "Public Edition v5.0: Enhanced leaderboard analytics, tactical power-ups & gravity anomalies."
+                </p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-black uppercase tracking-widest text-slate-400">Challenger Name / Squad ID</label>
+                        <span class="text-[10px] text-amber-400 font-bold">🔥 Public Leaderboard Ready</span>
+                    </div>
+                    <input type="text" id="playerNameInput" placeholder="Enter your name (e.g. Daniyal, Hamza, Ayesha)..." maxlength="25"
+                        class="w-full px-4 py-3.5 rounded-xl bg-slate-950/90 border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40 transition text-base font-bold shadow-inner">
+                </div>
+
+                <!-- Theme Category Mode Selectors -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div onclick="app.triggerHumorJoke('islamic')" class="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/40 text-center transition hover:border-emerald-400 shadow-md cursor-pointer group">
+                        <div class="text-2xl mb-1 transform group-hover:scale-110 transition">☪️</div>
+                        <div class="text-xs font-black text-emerald-400">Islamic</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5 font-medium">History & Wisdom</div>
+                    </div>
+                    <div onclick="app.triggerHumorJoke('logical')" class="p-3.5 rounded-2xl bg-slate-950/90 border border-cyan-500/40 text-center transition hover:border-cyan-400 shadow-md cursor-pointer group">
+                        <div class="text-2xl mb-1 transform group-hover:scale-110 transition">🧠</div>
+                        <div class="text-xs font-black text-cyan-400">Logical IQ</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5 font-medium">Riddles & Math</div>
+                    </div>
+                    <div onclick="app.triggerHumorJoke('pakistani')" class="p-3.5 rounded-2xl bg-slate-950/90 border border-amber-500/40 text-center transition hover:border-amber-400 shadow-md cursor-pointer group">
+                        <div class="text-2xl mb-1 transform group-hover:scale-110 transition">🚚</div>
+                        <div class="text-xs font-black text-amber-400">Pakistani</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5 font-medium">Wit & Heritage</div>
+                    </div>
+                </div>
+
+                <!-- Daily Fortune Reveal -->
+                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-center flex items-center justify-between">
+                    <div class="text-left">
+                        <h4 class="text-xs font-bold text-slate-200">🔮 Daily Cosmic Fortune</h4>
+                        <p class="text-[11px] text-slate-400" id="fortuneText">Click reveal for your daily IQ alignment prediction!</p>
+                    </div>
+                    <button onclick="app.drawFortune()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/40 font-bold text-xs transition shadow">
+                        Reveal ✨
+                    </button>
+                </div>
+
+                <button onclick="app.startQuiz()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-base shadow-xl shadow-emerald-500/20 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2 tracking-wide">
+                    <span>🚀 Launch Perfection Challenge</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 1.5: DRAMATIC PSYCHOLOGICAL INTRO BOOK MODAL -->
+        <div id="psychBookView" class="w-full max-w-2xl bg-theme-glass rounded-3xl p-6 sm:p-10 shadow-2xl glow-card hidden relative overflow-hidden text-center transition-all duration-700">
+            <div class="relative py-4 flex flex-col items-center justify-center">
+                
+                <div id="bookCoverGraphic" class="w-48 h-64 sm:w-56 sm:h-72 rounded-2xl bg-gradient-to-tr from-amber-950 via-slate-900 to-emerald-950 border-4 border-amber-500/60 shadow-2xl flex flex-col items-center justify-between p-6 transform transition-transform duration-700 hover:scale-105 cursor-pointer relative overflow-hidden">
+                    <div class="absolute inset-0 bg-radial from-amber-500/10 to-transparent animate-pulse"></div>
+                    <div class="text-xs font-black tracking-widest text-amber-400 uppercase border-b border-amber-500/30 pb-2 w-full">Cosmic Codex v5.0</div>
+                    <div class="text-6xl my-auto animate-bounce">📖</div>
+                    <div class="text-[11px] font-extrabold text-amber-300 tracking-wider">DO NOT OPEN</div>
+                </div>
+
+                <div id="bookPagesContainer" class="hidden w-full bg-slate-950/95 border-2 border-amber-500/50 rounded-2xl p-6 sm:p-8 text-left shadow-2xl space-y-4 relative">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <span class="text-xs font-black text-amber-400 uppercase tracking-widest">📜 The Mirror of Truth • V5.0</span>
+                        <span class="text-[10px] text-slate-500 font-mono">CONFIDENTIAL</span>
+                    </div>
+
+                    <div class="min-h-[140px] text-xs sm:text-sm font-bold text-slate-200 leading-relaxed font-mono space-y-3 p-4 bg-slate-900/80 rounded-xl border border-slate-800 shadow-inner break-words whitespace-pre-wrap">
+                        <p id="uncomfortableTextLine1" class="text-amber-300"></p>
+                        <p id="uncomfortableTextLine2" class="text-cyan-300"></p>
+                        <p id="uncomfortableTextLine3" class="text-rose-400 italic"></p>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button id="enterQuizFromBookBtn" onclick="app.proceedFromBookToQuiz()" class="hidden px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 transition flex items-center space-x-2 transform hover:scale-105">
+                            <span>I'm Ready... Let Me In 🧠</span> <span>➡️</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VIEW 2: QUIZ ARENA -->
+        <div id="quizView" class="w-full max-w-2xl bg-theme-glass rounded-3xl p-6 sm:p-8 shadow-2xl glow-card hidden relative overflow-hidden transition-all duration-500 quiz-flip-container">
+            
+            <!-- Gravity Anomaly Banner -->
+            <div id="gravityAlertBanner" class="hidden absolute inset-0 z-40 bg-purple-950/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 space-y-3 rounded-3xl border-2 border-purple-400">
+                <div class="text-5xl animate-bounce">🛸 🌀</div>
+                <h3 class="text-xl sm:text-2xl font-black text-purple-300 tracking-wide uppercase">Alien Gravity Anomaly!</h3>
+                <p class="text-xs sm:text-sm text-slate-200 font-bold max-w-md">
+                    Gravity inverted for 2 seconds! Hold onto your seat...
+                </p>
+            </div>
+
+            <!-- Quiz Top Header Metrics -->
+            <div id="themeIndicator" class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                    <span id="categoryBadgeIcon" class="text-3xl p-2.5 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner">☪️</span>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span id="categoryBadgeTitle" class="text-xs font-black tracking-widest uppercase text-emerald-400">Islamic Knowledge</span>
+                            <span id="difficultyBadge" class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/40 text-emerald-300 font-extrabold uppercase">Easy</span>
+                        </div>
+                        <h3 id="questionCounter" class="text-xs font-bold text-slate-400 mt-0.5">Question 1 of 12</h3>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Streak Multiplier Badge -->
+                    <div id="streakBadge" class="hidden px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-black text-xs animate-bounce shadow-lg">
+                        🔥 <span id="streakCountText">2x Combo</span>
+                    </div>
+
+                    <div class="px-3.5 py-1.5 rounded-full bg-slate-950 border border-slate-800 text-xs font-mono font-black text-amber-400 flex items-center space-x-1.5 shadow-inner">
+                        <span>⏱️</span> <span id="timerDisplay">15s</span>
+                    </div>
+                    <div class="px-3.5 py-1.5 rounded-full bg-slate-950 border border-slate-800 text-xs font-black text-cyan-400 shadow-inner">
+                        Score: <span id="currentScoreDisplay">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lifelines Power-Up Bar -->
+            <div class="flex items-center justify-between mb-5 bg-slate-950/70 p-2.5 rounded-2xl border border-slate-800 flex-wrap gap-2">
+                <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Tactical Power-Ups:</span>
+                <div class="flex items-center space-x-2">
+                    <button id="lifelineFiftyBtn" onclick="app.useLifelineFifty()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 font-bold text-xs border border-cyan-500/40 transition active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center space-x-1">
+                        <span>🌓</span> <span>50:50</span>
+                    </button>
+                    <button id="lifelineTimeBtn" onclick="app.useLifelineTime()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs border border-amber-500/40 transition active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center space-x-1">
+                        <span>⏳</span> <span>+10s Warp</span>
+                    </button>
+                    <button id="lifelinePollBtn" onclick="app.useLifelinePoll()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-300 font-bold text-xs border border-emerald-500/40 transition active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center space-x-1">
+                        <span>📊</span> <span>Mind Pulse</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="mb-5">
+                <h3 id="questionText" class="text-lg sm:text-xl font-extrabold text-slate-100 leading-snug mb-2">
+                    Loading question...
+                </h3>
+            </div>
+
+            <!-- Options Grid -->
+            <div id="optionsContainer" class="grid grid-cols-1 gap-3 mb-6">
+                <!-- Dynamically populated options -->
+            </div>
+
+            <!-- Feedback Commentary Box -->
+            <div id="feedbackBox" class="hidden p-4 rounded-2xl border mb-6 transition-all">
+                <div class="flex items-start space-x-3">
+                    <span id="feedbackIcon" class="text-2xl">💡</span>
+                    <div>
+                        <h4 id="feedbackTitle" class="font-black text-sm">Brilliant!</h4>
+                        <p id="feedbackDesc" class="text-xs text-slate-300 mt-1 leading-relaxed font-medium"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Question Button -->
+            <div class="flex justify-end">
+                <button id="nextQuestionBtn" onclick="app.nextQuestion()" class="hidden px-7 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-lg shadow-emerald-500/25 transition flex items-center space-x-2 transform hover:scale-105">
+                    <span>Next Challenge</span> <span>➡️</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 3: GLOWING MAGIC ORB REVEAL & FINAL REPORT -->
+        <div id="resultsView" class="w-full max-w-2xl bg-theme-glass rounded-3xl p-6 sm:p-8 shadow-2xl glow-card hidden relative overflow-hidden text-center">
+            
+            <!-- STAGE A: GLOWING MAGIC CRYSTAL ORB INTERACTIVE REVEAL -->
+            <div id="orbRevealStage" class="py-8 flex flex-col items-center justify-center space-y-6">
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">The Cosmic Orb of Zehanat</h2>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto font-medium">
+                    The Crystal Orb is evaluating your streak performance, accuracy ratio, and decision timing...
+                </p>
+
+                <div class="relative flex items-center justify-center my-4 cursor-pointer" onclick="app.accelerateOrbReveal()">
+                    <div class="magic-orb-container flex items-center justify-center shadow-2xl">
+                        <span id="orbEmoji" class="text-5xl animate-magic-spin">🔮</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <p id="orbStatusText" class="text-sm font-extrabold text-amber-400 animate-pulse">
+                        Analyzing brainwaves... Tap Orb to speed up!
+                    </p>
+                    <div class="w-48 h-2 rounded-full bg-slate-950 mx-auto overflow-hidden border border-slate-800">
+                        <div id="orbProgressBar" class="h-full bg-gradient-to-r from-cyan-400 via-amber-400 to-emerald-400 transition-all duration-300" style="width: 10%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE B: ACTUAL DETAILED RESULTS BOARD -->
+            <div id="detailedResultsStage" class="hidden text-left space-y-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 via-emerald-400 to-cyan-400 mx-auto flex items-center justify-center text-3xl shadow-xl text-slate-950 mb-3 font-black">
+                        👑
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-100 mb-1">Perfection Matrix Calculated!</h2>
+                    <p id="resultPlayerName" class="text-cyan-400 font-extrabold text-sm">Well played, Champion!</p>
+                </div>
+
+                <!-- Score Dashboard Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 text-center shadow-inner">
+                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1">Total Score</div>
+                        <div id="resTotalScore" class="text-2xl font-black text-amber-400">120 pts</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 text-center shadow-inner">
+                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1">Perfection Rank</div>
+                        <div id="resPerfectionBadge" class="text-xs font-black text-emerald-400">95% • Elite</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 text-center shadow-inner">
+                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1">Accuracy & Streak</div>
+                        <div id="resAccuracy" class="text-xl font-black text-cyan-400">10/12</div>
+                    </div>
+                </div>
+
+                 <!-- Category Breakdown Bars -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3.5 shadow-inner">
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Category Mastery Breakdown</h4>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-emerald-400">☪️ Islamic Wisdom</span>
+                            <span id="islamicScoreBreakdown" class="text-slate-300">4/4</span>
+                        </div>
+                        <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                            <div id="islamicBar" class="h-full bg-emerald-400 transition-all duration-700" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-cyan-400">🧠 Logical IQ</span>
+                            <span id="logicalScoreBreakdown" class="text-slate-300">3/4</span>
+                        </div>
+                        <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                            <div id="logicalBar" class="h-full bg-cyan-400 transition-all duration-700" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-amber-400">🚚 Pakistani Heritage</span>
+                            <span id="pakistaniScoreBreakdown" class="text-slate-300">3/4</span>
+                        </div>
+                        <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                            <div id="pakistaniBar" class="h-full bg-amber-400 transition-all duration-700" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Question Revision Accordion/List -->
+                <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+                    <button onclick="app.toggleResultQuestionReview()" class="w-full flex items-center justify-between text-xs font-black uppercase text-slate-300 tracking-wider">
+                        <span>🔍 Inspect Your Answer Breakdown</span>
+                        <span id="toggleReviewIcon">▼</span>
+                    </button>
+                    <div id="resultQuestionReviewList" class="hidden space-y-2 pt-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Dynamically populated answer review cards -->
+                    </div>
+                </div>
+
+                <!-- Witty Critique -->
+                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 italic" id="resultHumorCritique">
+                    "The orb has spoken: your friends will need at least three cups of chai to process this score."
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="app.goHome()" class="flex-1 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-xs transition border border-slate-700 text-center">
+                        🔄 Play Again / Swap Player
+                    </button>
+                    <button onclick="app.openLeaderboard()" class="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs transition shadow-lg shadow-amber-500/20 text-center">
+                        🏆 View Leaderboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- RAPID INSTANT QUIZ MODAL -->
+    <div id="customQuizModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-lg bg-theme-glass rounded-3xl p-6 sm:p-8 shadow-2xl border border-purple-500/40">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <div class="flex items-center space-x-2.5">
+                    <span class="text-2xl p-2 rounded-xl bg-slate-900 border border-slate-800">⚡</span>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-100">Instant 3-Question Rapid Blitz</h3>
+                        <p class="text-xs text-slate-400">Quick 45-second lightning test!</p>
+                    </div>
+                </div>
+                <button onclick="app.closeCustomQuizModal()" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 flex items-center justify-center transition font-bold text-xs border border-slate-700">
+                    ✕
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-300 mb-4 font-medium">
+                Short on time? Play a randomized 3-question rapid blitz mode right now!
+            </p>
+
+            <button onclick="app.startBlitzMode()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-slate-950 font-black text-xs transition shadow-lg shadow-purple-500/25">
+                ⚡ Start 3-Question Blitz Now
+            </button>
+        </div>
+    </div>
+
+    <!-- PUZZLE WARMUP MODAL -->
+    <div id="warmupModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-lg bg-theme-glass rounded-3xl p-6 sm:p-8 shadow-2xl border border-cyan-500/40">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <div class="flex items-center space-x-2.5">
+                    <span class="text-2xl p-2 rounded-xl bg-slate-900 border border-slate-800">🧩</span>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-100">Quick IQ Brain Warmup</h3>
+                        <p class="text-xs text-slate-400">Warm up your neurons before starting!</p>
+                    </div>
+                </div>
+                <button onclick="app.closeWarmupModal()" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 flex items-center justify-center transition font-bold text-xs border border-slate-700">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <p id="warmupQuestion" class="text-sm font-semibold text-slate-200">
+                    Which letter replaces the question mark in this sequence: O, T, T, F, F, S, S, E, ?
+                </p>
+                <div id="warmupOptions" class="grid grid-cols-2 gap-2.5">
+                    <button onclick="app.checkWarmup('N', true)" class="p-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 transition">N (Nine)</button>
+                    <button onclick="app.checkWarmup('T', false)" class="p-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 transition">T (Ten)</button>
+                    <button onclick="app.checkWarmup('E', false)" class="p-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 transition">E (Eight)</button>
+                    <button onclick="app.checkWarmup('S', false)" class="p-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 transition">S (Seven)</button>
+                </div>
+                <div id="warmupResult" class="hidden p-3 rounded-xl text-xs font-bold text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PUBLIC ENHANCED LEADERBOARD & FRIENDS HISTORY MODAL -->
+    <div id="leaderboardModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-2xl bg-theme-glass rounded-3xl p-6 sm:p-8 shadow-2xl border border-cyan-500/40 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-3">
+                <div class="flex items-center space-x-2.5">
+                    <span class="text-2xl p-2 rounded-xl bg-slate-900 border border-slate-800">🏆</span>
+                    <div>
+                        <h3 class="font-extrabold text-lg text-slate-100">Global Leaderboard Hub v5</h3>
+                        <p class="text-xs text-slate-400">Search challengers, inspect answer breakdowns, and flex ranks!</p>
+                    </div>
+                </div>
+                <button onclick="app.closeLeaderboard()" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 flex items-center justify-center transition font-bold text-xs border border-slate-700">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Leaderboard Search & Filter Bar -->
+            <div class="mb-4 flex items-center space-x-2">
+                <div class="relative flex-1">
+                    <input type="text" id="leaderboardSearchInput" oninput="app.filterLeaderboard()" placeholder="Search player name..."
+                        class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-200 text-xs font-bold focus:outline-none focus:border-cyan-400">
+                    <span class="absolute left-3 top-2.5 text-xs text-slate-500">🔍</span>
+                </div>
+                <select id="leaderboardSortSelect" onchange="app.filterLeaderboard()" class="px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-bold text-slate-300 focus:outline-none focus:border-cyan-400">
+                    <option value="score">Sort by Score</option>
+                    <option value="perfection">Sort by Perfection</option>
+                    <option value="recent">Sort by Recent</option>
+                </select>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1" id="leaderboardListContainer">
+                <!-- Dynamically populated entries -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex justify-between items-center mt-4">
+                <button onclick="app.promptClearLeaderboard()" class="px-4 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 text-xs font-bold transition flex items-center space-x-1.5 shadow">
+                    <span>🗑️</span> <span>Clear History</span>
+                </button>
+                <button onclick="app.closeLeaderboard()" class="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs transition shadow-lg shadow-cyan-500/20">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+     <!-- CLEAR HISTORY CONFIRMATION MODAL -->
+    <div id="clearConfirmModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-sm bg-theme-glass rounded-3xl p-6 shadow-2xl border border-rose-500/40 text-center space-y-4">
+            <div class="w-12 h-12 rounded-2xl bg-rose-950 border border-rose-500/50 text-rose-400 flex items-center justify-center text-2xl mx-auto shadow-lg">
+                ⚠️
+            </div>
+            <div>
+                <h3 class="font-extrabold text-base text-slate-100 mb-1">Clear All Scores?</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">This will permanently delete all saved friend run records and scores from this device.</p>
+            </div>
+            <div class="flex items-center space-x-2 pt-2">
+                <button onclick="app.cancelClearLeaderboard()" class="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs border border-slate-700 transition">
+                    Cancel
+                </button>
+                <button onclick="app.confirmClearLeaderboard()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs shadow-lg shadow-rose-600/30 transition">
+                    Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAILED RUN INSPECTION MODAL -->
+    <div id="runInspectionModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-xl bg-theme-glass rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-500/40 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <div>
+                    <h3 id="inspectPlayerNameTitle" class="font-extrabold text-lg text-slate-100">Player Answer Details</h3>
+                    <p id="inspectPlayerMeta" class="text-xs text-slate-400">Score: 120 • Perfection: 95%</p>
+                </div>
+                <button onclick="app.closeRunInspection()" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 flex items-center justify-center transition font-bold text-xs border border-slate-700">
+                    ✕
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1" id="inspectQuestionsContainer">
+                <!-- Dynamically populated answer review items -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 text-right mt-4">
+                <button onclick="app.closeRunInspection()" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-xs transition border border-slate-700">
+                    Back to Leaderboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer with attribution -->
+    <footer class="w-full py-3 text-center text-[11px] text-slate-500 border-t border-slate-800/80 bg-slate-950/80 z-10 flex items-center justify-center space-x-2">
+        <span>Majlis-e-Zehanat v5.0 Next-Gen Edition ✨</span>
+        <span>•</span>
+        <span class="text-slate-400 font-bold">Crafted with ❤️ by Fahad</span>
+    </footer>
+
+    <script>
+        // Enhanced Web Audio Synthesizer Engine v5 with Browser Safety Fallbacks
+        const SoundFX = {
+            enabled: true,
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        if (AudioContext) {
+                            this.ctx = new AudioContext();
+                        }
+                    } catch (e) {
+                        console.warn("Web Audio API not supported/allowed:", e);
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            },
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(650, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(850, this.ctx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.05);
+                } catch (e) {}
+            },
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } catch (e) {}
+            },
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(130, now + 0.3);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } catch (e) {}
+            },
+            playPowerup() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } catch (e) {}
+            },
+            playOrbSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(900, now + 0.8);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.8);
+                } catch (e) {}
+            },
+            playFlipSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.4);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } catch (e) {}
+            },
+            playCreakSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(80, now);
+                    osc.frequency.exponentialRampToValueAtTime(220, now + 0.7);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.7);
+                } catch (e) {}
+            },
+            playFanfare() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const now = this.ctx.currentTime + (idx * 0.12);
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now);
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.3);
+                    });
+                } catch (e) {}
+            }
+        };
+
+        class CosmicSpaceSystemCanvas {
+            constructor() {
+                this.canvas = document.getElementById('spaceCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                this.planets = [
+                    { distance: 80, size: 6, speed: 0.015, angle: 0, color: '#94a3b8' },
+                    { distance: 130, size: 9, speed: 0.01, angle: 2, color: '#fbbf24' },
+                    { distance: 190, size: 10, speed: 0.007, angle: 4, color: '#38bdf8' },
+                    { distance: 260, size: 8, speed: 0.005, angle: 1, color: '#f87171' },
+                    { distance: 340, size: 16, speed: 0.003, angle: 3, color: '#fb923c' }
+                ];
+
+                this.stars = Array.from({ length: 110 }, () => ({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    size: Math.random() * 2,
+                    alpha: Math.random()
+                }));
+
+                this.shootingStars = [];
+                setInterval(() => this.spawnShootingStar(), 3000);
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            spawnShootingStar() {
+                this.shootingStars.push({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * (this.canvas.height / 2),
+                    length: 80 + Math.random() * 60,
+                    speed: 8 + Math.random() * 6,
+                    angle: Math.PI / 4,
+                    alpha: 1
+                });
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.ctx.fillStyle = '#ffffff';
+                this.stars.forEach(star => {
+                    this.ctx.globalAlpha = star.alpha;
+                    this.ctx.beginPath();
+                    this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1;
+
+                for (let i = this.shootingStars.length - 1; i >= 0; i--) {
+                    const s = this.shootingStars[i];
+                    s.x += Math.cos(s.angle) * s.speed;
+                    s.y += Math.sin(s.angle) * s.speed;
+                    s.alpha -= 0.015;
+
+                    if (s.alpha <= 0) {
+                        this.shootingStars.splice(i, 1);
+                        continue;
+                    }
+
+                     const grad = this.ctx.createLinearGradient(s.x, s.y, s.x - Math.cos(s.angle) * s.length, s.y - Math.sin(s.angle) * s.length);
+                    grad.addColorStop(0, `rgba(56, 189, 248, ${s.alpha})`);
+                    grad.addColorStop(1, 'transparent');
+
+                    this.ctx.strokeStyle = grad;
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(s.x, s.y);
+                    this.ctx.lineTo(s.x - Math.cos(s.angle) * s.length, s.y - Math.sin(s.angle) * s.length);
+                    this.ctx.stroke();
+                }
+
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+
+                const sunGlow = this.ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, 38);
+                sunGlow.addColorStop(0, '#fef08a');
+                sunGlow.addColorStop(0.5, '#f59e0b');
+                sunGlow.addColorStop(1, 'transparent');
+                this.ctx.fillStyle = sunGlow;
+                this.ctx.beginPath();
+                this.ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.planets.forEach(p => {
+                    p.angle += p.speed;
+                    const x = centerX + Math.cos(p.angle) * p.distance;
+                    const y = centerY + Math.sin(p.angle) * (p.distance * 0.5);
+
+                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(centerX, centerY, p.distance, p.distance * 0.5, 0, 0, Math.PI * 2);
+                    this.ctx.stroke();
+
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        const extendedQuestionsData = [
+            // ISLAMIC HISTORY & WISDOM
+            {
+                category: "islamic",
+                difficulty: "Easy",
+                icon: "☪️",
+                title: "Islamic Wisdom",
+                question: "Which Surah of the Holy Quran is known as 'Uroos-ul-Quran' (The Bride of the Quran)?",
+                options: ["Surah Yaseen", "Surah Ar-Rahman", "Surah Al-Mulk", "Surah Al-Waqiah"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "SubhanAllah! Your heart is attuned to Quranic beauty.",
+                    wrong: "Time to pick up the Quran and refresh your Surah titles, my friend."
+                }
+            }, {
+                category: "islamic",
+                difficulty: "Medium",
+                icon: "☪️",
+                title: "Islamic Wisdom",
+                question: "In which Islamic Hijri year was the decisive Battle of Badr fought?",
+                options: ["1 AH", "2 AH", "3 AH", "5 AH"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Spot on! The historical turning point in Islamic history.",
+                    wrong: "Not quite! Battle of Badr was fought in 2 AH."
+                }
+            },
+            {
+                category: "islamic",
+                difficulty: "Hard",
+                icon: "☪️",
+                title: "Islamic Wisdom",
+                question: "Who was awarded the honored title 'Saifullah' (The Sword of Allah)?",
+                options: ["Hazrat Ali (RA)", "Hazrat Hamza (RA)", "Hazrat Khalid bin Walid (RA)", "Hazrat Umar (RA)"],
+                correctIndex: 2,
+                funnyCommentary: {
+                    correct: "Magnificent! The invincible military strategist of Islam.",
+                    wrong: "Close, but Saifullah specifically refers to Hazrat Khalid bin Walid (RA)."
+                }
+            },
+            {
+                category: "islamic",
+                difficulty: "Easy",
+                icon: "☪️",
+                title: "Islamic Wisdom",
+                question: "Which Prophet holds the honored title 'Khalilullah' (The Friend of Allah)?",
+                options: ["Hazrat Musa (AS)", "Hazrat Ibrahim (AS)", "Hazrat Isa (AS)", "Hazrat Nuh (AS)"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Mashallah! Hazrat Ibrahim (AS) holds this title.",
+                    wrong: "A quick history check: 'Khalilullah' is Hazrat Ibrahim (AS)."
+                }
+            },
+            {
+                category: "islamic",
+                difficulty: "Medium",
+                icon: "☪️",
+                title: "Islamic Wisdom",
+                question: "How many Sujood-e-Tilawat (Prostrations of Recitation) are there in the Holy Quran?",
+                options: ["12", "14", "16", "18"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Precisely 14 prostrations in the entire Quran!",
+                    wrong: "There are 14 Sujood of recitation in total."
+                }
+            },
+
+            // LOGICAL IQ & RIDDLES
+            {
+                category: "logical",
+                difficulty: "Medium",
+                icon: "🧠",
+                title: "Logical IQ & Puzzles",
+                question: "If 5 cats can catch 5 mice in 5 minutes, how many minutes will it take 100 cats to catch 100 mice?",
+                options: ["100 minutes", "20 minutes", "5 minutes", "1 minute"],
+                correctIndex: 2,
+                funnyCommentary: {
+                    correct: "Sharp logic! Each cat works concurrently at the exact same rate.",
+                    wrong: "Tricked by the numbers! 100 cats catch 100 mice in 5 minutes."
+                }
+            },
+            {
+                category: "logical",
+                difficulty: "Easy",
+                icon: "🧠",
+                title: "Logical IQ & Puzzles",
+                question: "What comes next in this prime number riddle: 2, 3, 5, 7, 11, ?",
+                options: ["12", "13", "15", "17"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Sharp math mind! 13 is the next prime number.",
+                    wrong: "Remember prime numbers are only divisible by 1 and themselves! 13 is next."
+                }
+            },
+            {
+                category: "logical",
+                difficulty: "Easy",
+                icon: "🧠",
+                title: "Logical IQ & Puzzles",
+                question: "I speak without a mouth and hear without ears. I have no body, but come alive with wind. What am I?",
+                options: ["A cloud", "An echo", "A shadow", "A radio wave"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Flawless! An echo bounces sound effortlessly.",
+                    wrong: "Not quite. An echo plays tricks with sound!"
+                }
+            },
+            {
+                category: "logical",
+                difficulty: "Medium",
+                icon: "🧠",
+                title: "Logical IQ & Puzzles",
+                question: "An electric train travels north at 60 mph and wind blows from the west. Which way does the smoke blow?",
+                options: ["East", "West", "North", "Electric trains don't produce smoke!"],
+                correctIndex: 3,
+                funnyCommentary: {
+                    correct: "You caught the trick! Electric trains produce no smoke.",
+                    wrong: "Trapped by the riddle! Electric trains run on electricity!"
+                }
+            },
+
+            // PAKISTANI CULTURE & HERITAGE
+            {
+                category: "pakistani",
+                difficulty: "Easy",
+                icon: "🚚",
+                title: "Pakistani Culture & GK",
+                question: "Which historic mountain pass connects Pakistan with Afghanistan?",
+                options: ["Khunjerab Pass", "Khyber Pass", "Bolan Pass", "Lowari Pass"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Zabardast! The historical Khyber Pass near Peshawar.",
+                    wrong: "Khunjerab is the China border; Khyber Pass connects to Afghanistan!"
+                }
+            },
+            {
+                category: "pakistani",
+                difficulty: "Easy",
+                icon: "🚚",
+                title: "Pakistani Culture & GK",
+                question: "Which iconic truck art poetry line is world-famous on Pakistani highway trucks?",
+                options: ["Horn Please", "Maa Ki Dua Jannat Ki Hawa", "Drive Safe", "Speed is Thrill"],
+                correctIndex: 1,
+                funnyCommentary: {
+                    correct: "Wah! 'Maa Ki Dua Jannat Ki Hawa' is the undisputed truck art crown!",
+                    wrong: "Arrey! Every true Pakistani truck proudly boasts 'Maa Ki Dua Jannat Ki Hawa'."
+                }
+            },
+            {
+                category: "pakistani",
+                difficulty: "Medium",
+                icon: "🚚",
+                title: "Pakistani Culture & GK",
+                question: "Which city in Pakistan is celebrated as the 'City of Gardens' (Baghoun Ka Shehar)?",
+                options: ["Islamabad", "Peshawar", "Lahore", "Quetta"],
+                correctIndex: 2,
+                funnyCommentary: {
+                    correct: "Lahore da Lahore aye! Gardens and historic charm.",
+                    wrong: "Lahore holds the title of City of Gardens!"
+                }
+            }
+        ];
+
+        const fortunes = [
+            "🔮 Your brain is operating at 120% efficiency today. Challenge someone immediately!",
+            "🧠 Logical clarity is high. Just don't let trick questions catch you slipping.",
+            "🌟 High chance of bragging rights across all group chats today!",
+            "☕ A cup of chai will boost your IQ test accuracy by +25%."
+        ];
+
+        const humorJokes = {
+            islamic: "Islamic Mode selected! May your knowledge be illuminated.",
+            logical: "Logical IQ Mode! Get ready to overthink every simple question.",
+            pakistani: "Pakistani Wit Mode! Where '5 minutes away' means half an hour."
+        };
+
+        const resultCritiques = [
+            "Your friends will need at least three cups of chai to process this score.",
+            "Absolute perfectionist energy! Feel free to flex in the squad group chat.",
+            "A solid performance! Room for growth, but definitely respectable.",
+            "You guessed some, you knew some, and the magic orb observed it all!"
+        ];
+
+        const uncomfortableQuotes = [
+            {
+                l1: "Warning: We have scanned your profile...",
+                l2: "Your friends claim you are the smart one. But deep down, you know you just guess really quickly.",
+                l3: "If you fail this test, we are emailing your detailed score report directly to your entire group."
+            },
+            {
+                l1: "Flipping to your personal chapter...",
+                l2: "We know you selected your answer before even finishing the full question. Overconfidence is a trap.",
+                l3: "Remember: accurate memory is rare... but bragging rights last forever."
+            }
+        ];
+
+        class TriviaApp {
+            constructor() {
+                this.playerName = "";
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.streak = 0;
+                this.timer = null;
+                this.timeLeft = 15;
+                this.runAnswers = [];
+                this.categoryScores = { islamic: 0, logical: 0, pakistani: 0 };
+                this.activeQuestionSet = [];
+                this.orbTimer = null;
+                this.typewriterTimer = null;
+                this.orbProgress = 10;
+                this.flipsExecuted = 0;
+                
+                // Lifelines state v5
+                this.lifelines = { fiftyUsed: false, timeUsed: false, pollUsed: false };
+            }
+
+            setDynamicTheme(category) {
+                const body = document.getElementById('mainBody');
+                body.classList.remove('theme-islamic', 'theme-logical', 'theme-pakistani');
+                body.classList.add(`theme-${category}`);
+            }
+
+            triggerHumorJoke(cat) {
+                SoundFX.playClick();
+                document.getElementById('humorTagline').innerText = humorJokes[cat] || humorJokes.islamic;
+                this.setDynamicTheme(cat);
+            }
+
+            drawFortune() {
+                SoundFX.playClick();
+                const rand = fortunes[Math.floor(Math.random() * fortunes.length)];
+                document.getElementById('fortuneText').innerText = rand;
+            }
+
+            openWarmupModal() {
+                SoundFX.playClick();
+                document.getElementById('warmupResult').classList.add('hidden');
+                document.getElementById('warmupModal').classList.remove('hidden');
+            }
+
+            closeWarmupModal() {
+                SoundFX.playClick();
+                document.getElementById('warmupModal').classList.add('hidden');
+            }
+
+            openCustomQuizModal() {
+                SoundFX.playClick();
+                document.getElementById('customQuizModal').classList.remove('hidden');
+            }
+
+            closeCustomQuizModal() {
+                SoundFX.playClick();
+                document.getElementById('customQuizModal').classList.add('hidden');
+            }
+
+            startBlitzMode() {
+                this.closeCustomQuizModal();
+                this.startQuiz(true);
+            }
+
+            checkWarmup(ans, isCorrect) {
+                const res = document.getElementById('warmupResult');
+                res.classList.remove('hidden');
+                if (isCorrect) {
+                    SoundFX.playCorrect();
+                    res.className = "p-3 rounded-xl text-xs font-bold text-center bg-emerald-950/80 text-emerald-400 border border-emerald-500/50";
+                    res.innerText = "Brilliant! N stands for Nine (One, Two, Three, Four, Five, Six, Seven, Eight, Nine)!";
+                } else {
+                    SoundFX.playWrong();
+                    res.className = "p-3 rounded-xl text-xs font-bold text-center bg-rose-950/80 text-rose-400 border border-rose-500/50";
+                    res.innerText = "Not quite! Think of number names starting from One, Two, Three...";
+                }
+            }
+
+            goHome() {
+                SoundFX.playClick();
+                clearInterval(this.timer);
+                clearInterval(this.orbTimer);
+                clearInterval(this.typewriterTimer);
+                this.setDynamicTheme('islamic');
+                document.getElementById('homeView').classList.remove('hidden');
+                document.getElementById('psychBookView').classList.add('hidden');
+                document.getElementById('quizView').classList.add('hidden');
+                document.getElementById('resultsView').classList.add('hidden');
+                document.getElementById('leaderboardModal').classList.add('hidden');
+                document.getElementById('runInspectionModal').classList.add('hidden');
+            }
+
+            startQuiz(isBlitz = false) {
+                const nameInput = document.getElementById('playerNameInput');
+                const name = nameInput.value.trim();
+                if (!name) {
+                    nameInput.focus();
+                    nameInput.classList.add('ring-2', 'ring-rose-500');
+                    setTimeout(() => nameInput.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                    return;
+                }
+                SoundFX.playClick();
+                this.playerName = name;
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.streak = 0;
+                this.runAnswers = [];
+                this.categoryScores = { islamic: 0, logical: 0, pakistani: 0 };
+                this.flipsExecuted = 0;
+                this.lifelines = { fiftyUsed: false, timeUsed: false, pollUsed: false };
+
+                const shuffled = [...extendedQuestionsData].sort(() => 0.5 - Math.random());
+                this.activeQuestionSet = isBlitz ? shuffled.slice(0, 3) : shuffled.slice(0, 12);
+
+                document.getElementById('homeView').classList.add('hidden');
+                document.getElementById('resultsView').classList.add('hidden');
+                document.getElementById('quizView').classList.add('hidden');
+
+                this.openPsychologicalBook();
+            }
+
+            openPsychologicalBook() {
+                const bookView = document.getElementById('psychBookView');
+                const bookCover = document.getElementById('bookCoverGraphic');
+                const bookPages = document.getElementById('bookPagesContainer');
+                const nextBtn = document.getElementById('enterQuizFromBookBtn');
+
+                bookView.classList.remove('hidden');
+                bookCover.classList.remove('hidden');
+                bookPages.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+
+                document.getElementById('uncomfortableTextLine1').innerText = "";
+                document.getElementById('uncomfortableTextLine2').innerText = "";
+                document.getElementById('uncomfortableTextLine3').innerText = "";
+
+                setTimeout(() => {
+                    SoundFX.playCreakSound();
+                    bookCover.classList.add('hidden');
+                    bookPages.classList.remove('hidden');
+
+                    const textSet = uncomfortableQuotes[Math.floor(Math.random() * uncomfortableQuotes.length)];
+                    
+                    this.typewriterEffect('uncomfortableTextLine1', textSet.l1, 25, () => {
+                        this.typewriterEffect('uncomfortableTextLine2', textSet.l2, 20, () => {
+                            this.typewriterEffect('uncomfortableTextLine3', textSet.l3, 20, () => {
+                                nextBtn.classList.remove('hidden');
+                            });
+                        });
+                    });
+                }, 800);
+            }
+
+            typewriterEffect(elementId, text, speed, onComplete) {
+                let i = 0;
+                const el = document.getElementById(elementId);
+                el.textContent = "";
+                if (this.typewriterTimer) clearInterval(this.typewriterTimer);
+                this.typewriterTimer = setInterval(() => {
+                    if (i < text.length) {
+                        el.textContent += text.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(this.typewriterTimer);
+                        if (onComplete) onComplete();
+                    }
+                }, speed);
+            }
+
+            proceedFromBookToQuiz() {
+                SoundFX.playClick();
+                document.getElementById('psychBookView').classList.add('hidden');
+                document.getElementById('quizView').classList.remove('hidden');
+                this.loadQuestion();
+            }
+
+            loadQuestion() {
+                clearInterval(this.timer);
+                if (this.currentQuestionIndex >= this.activeQuestionSet.length) {
+                    this.finishQuiz();
+                    return;
+                }
+
+                const q = this.activeQuestionSet[this.currentQuestionIndex];
+                
+                this.setDynamicTheme(q.category);
+
+                document.getElementById('categoryBadgeIcon').innerText = q.icon;
+                const titleSpan = document.getElementById('categoryBadgeTitle');
+                titleSpan.innerText = q.title;
+                if (q.category === 'islamic') titleSpan.className = "text-xs font-extrabold tracking-widest uppercase text-emerald-400";
+                else if (q.category === 'logical') titleSpan.className = "text-xs font-extrabold tracking-widest uppercase text-cyan-400";
+                else titleSpan.className = "text-xs font-extrabold tracking-widest uppercase text-amber-400";
+
+                document.getElementById('difficultyBadge').innerText = q.difficulty || "Medium";
+
+                document.getElementById('questionCounter').innerText = `Question ${this.currentQuestionIndex + 1} of ${this.activeQuestionSet.length}`;
+                document.getElementById('currentScoreDisplay').innerText = this.score;
+
+                // Update Lifelines buttons status
+                document.getElementById('lifelineFiftyBtn').disabled = this.lifelines.fiftyUsed;
+                document.getElementById('lifelineTimeBtn').disabled = this.lifelines.timeUsed;
+                document.getElementById('lifelinePollBtn').disabled = this.lifelines.pollUsed;
+
+                const streakBadge = document.getElementById('streakBadge');
+                if (this.streak >= 2) {
+                    streakBadge.classList.remove('hidden');
+                    document.getElementById('streakCountText').innerText = `${this.streak}x Combo`;
+                } else {
+                    streakBadge.classList.add('hidden');
+                }
+
+                document.getElementById('questionText').innerText = q.question;
+                
+                document.getElementById('feedbackBox').classList.add('hidden');
+                document.getElementById('nextQuestionBtn').classList.add('hidden');
+
+                const container = document.getElementById('optionsContainer');
+                container.innerHTML = '';
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.id = `opt-btn-${idx}`;
+                    btn.className = "w-full p-4 rounded-2xl bg-slate-950/90 border border-slate-800 text-left text-slate-100 font-bold text-sm transition option-card-hover flex items-center justify-between group shadow-md";
+                    btn.innerHTML = `
+                        <span>${opt}</span>
+                        <span class="w-7 h-7 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 group-hover:border-cyan-400 group-hover:text-cyan-300 flex items-center justify-center text-xs font-black transition">${String.fromCharCode(65 + idx)}</span>
+                    `;
+                    btn.onclick = () => this.selectAnswer(idx);
+                    container.appendChild(btn);
+                });
+
+                this.timeLeft = 15;
+                document.getElementById('timerDisplay').innerText = `${this.timeLeft}s`;
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    document.getElementById('timerDisplay').innerText = `${this.timeLeft}s`;
+                    if (this.timeLeft <= 0) {
+                        clearInterval(this.timer);
+                        this.selectAnswer(-1);
+                    }
+                }, 1000);
+            }
+
+            useLifelineFifty() {
+                if (this.lifelines.fiftyUsed) return;
+                SoundFX.playPowerup();
+                this.lifelines.fiftyUsed = true;
+                document.getElementById('lifelineFiftyBtn').disabled = true;
+
+                const q = this.activeQuestionSet[this.currentQuestionIndex];
+                let disabledCount = 0;
+                for (let i = 0; i < q.options.length; i++) {
+                    if (i !== q.correctIndex && disabledCount < 2) {
+                        const btn = document.getElementById(`opt-btn-${i}`);
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.className = "w-full p-4 rounded-2xl bg-slate-950/30 border border-slate-900 text-slate-600 font-bold text-sm line-through opacity-30 cursor-not-allowed flex items-center justify-between";
+                        }
+                        disabledCount++;
+                    }
+                }
+            }
+
+            useLifelineTime() {
+                if (this.lifelines.timeUsed) return;
+                SoundFX.playPowerup();
+                this.lifelines.timeUsed = true;
+                document.getElementById('lifelineTimeBtn').disabled = true;
+
+                this.timeLeft += 10;
+                document.getElementById('timerDisplay').innerText = `${this.timeLeft}s`;
+            }
+
+            useLifelinePoll() {
+                if (this.lifelines.pollUsed) return;
+                SoundFX.playPowerup();
+                this.lifelines.pollUsed = true;
+                document.getElementById('lifelinePollBtn').disabled = true;
+
+                const q = this.activeQuestionSet[this.currentQuestionIndex];
+                q.options.forEach((_, idx) => {
+                    const btn = document.getElementById(`opt-btn-${idx}`);
+                    if (btn && !btn.disabled) {
+                        const pct = idx === q.correctIndex ? Math.floor(65 + Math.random() * 20) : Math.floor(5 + Math.random() * 15);
+                        const tag = document.createElement('span');
+                        tag.className = "text-[10px] font-black text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/40 ml-2";
+                        tag.innerText = `Mind Pulse: ${pct}%`;
+                        btn.appendChild(tag);
+                    }
+                });
+            }
+
+            selectAnswer(selectedIndex) {
+                clearInterval(this.timer);
+                const q = this.activeQuestionSet[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === q.correctIndex;
+
+                if (isCorrect) {
+                    SoundFX.playCorrect();
+                    this.streak++;
+                    const multiplier = this.streak >= 3 ? 2 : 1;
+                    const basePoints = 10 + (this.timeLeft > 0 ? this.timeLeft : 0);
+                    this.score += basePoints * multiplier;
+                    this.categoryScores[q.category]++;
+                } else {
+                    SoundFX.playWrong();
+                    this.streak = 0;
+                }
+
+                this.runAnswers.push({
+                    question: q.question,
+                    category: q.category,
+                    options: q.options,
+                    selectedIndex: selectedIndex,
+                    correctIndex: q.correctIndex,
+                    isCorrect: isCorrect
+                });
+
+                const buttons = document.getElementById('optionsContainer').children;
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].disabled = true;
+                    if (i === q.correctIndex) {
+                        buttons[i].className = "w-full p-4 rounded-2xl bg-emerald-950/90 border-2 border-emerald-400 text-left text-emerald-200 font-extrabold text-sm flex items-center justify-between shadow-lg shadow-emerald-500/20";
+                    } else if (i === selectedIndex && !isCorrect) {
+                        buttons[i].className = "w-full p-4 rounded-2xl bg-rose-950/90 border-2 border-rose-500 text-left text-rose-200 font-extrabold text-sm flex items-center justify-between shadow-lg shadow-rose-500/20";
+                    } else {
+                        buttons[i].className = "w-full p-4 rounded-2xl bg-slate-950/40 border border-slate-900 text-left text-slate-500 text-sm flex items-center justify-between opacity-35";
+                    }
+                }
+
+                const feedbackBox = document.getElementById('feedbackBox');
+                const feedbackTitle = document.getElementById('feedbackTitle');
+                const feedbackDesc = document.getElementById('feedbackDesc');
+                const feedbackIcon = document.getElementById('feedbackIcon');
+
+                feedbackBox.classList.remove('hidden');
+                if (isCorrect) {
+                    feedbackBox.className = "p-4 rounded-2xl bg-emerald-950/90 border border-emerald-500/60 mb-6 transition-all shadow-xl shadow-emerald-500/10";
+                    feedbackIcon.innerText = this.streak >= 2 ? "🔥" : "🌟";
+                    feedbackTitle.innerText = this.streak >= 2 ? `Combo Streak! x${this.streak}` : "Spot On! Excellent Answer!";
+                    feedbackTitle.className = "font-black text-sm text-emerald-400";
+                    feedbackDesc.innerText = q.funnyCommentary.correct;
+                } else {
+                    feedbackBox.className = "p-4 rounded-2xl bg-rose-950/90 border border-rose-500/60 mb-6 transition-all shadow-xl shadow-rose-500/10";
+                    feedbackIcon.innerText = "😅";
+                    feedbackTitle.innerText = selectedIndex === -1 ? "Time's Up!" : "Oops! Incorrect!";
+                    feedbackTitle.className = "font-black text-sm text-rose-400";
+                    feedbackDesc.innerText = q.funnyCommentary.wrong;
+                }
+
+                document.getElementById('currentScoreDisplay').innerText = this.score;
+                document.getElementById('nextQuestionBtn').classList.remove('hidden');
+            }
+
+            nextQuestion() {
+                SoundFX.playClick();
+                this.currentQuestionIndex++;
+
+                const isFlipTriggerQuestion = (this.currentQuestionIndex === 3 || this.currentQuestionIndex === 8);
+                
+                if (isFlipTriggerQuestion && this.flipsExecuted < 2 && this.currentQuestionIndex < this.activeQuestionSet.length) {
+                    this.flipsExecuted++;
+                    this.triggerGravityFlip(() => {
+                        this.loadQuestion();
+                    });
+                } else {
+                    this.loadQuestion();
+                }
+            }
+
+            triggerGravityFlip(onComplete) {
+                const quizBox = document.getElementById('quizView');
+                const alertBanner = document.getElementById('gravityAlertBanner');
+
+                if (!quizBox) {
+                    onComplete();
+                    return;
+                }
+
+                SoundFX.playFlipSound();
+                alertBanner.classList.remove('hidden');
+                quizBox.classList.add('quiz-upside-down');
+
+                setTimeout(() => {
+                    quizBox.classList.remove('quiz-upside-down');
+                    alertBanner.classList.add('hidden');
+                    SoundFX.playFlipSound();
+                    
+                    setTimeout(() => {
+                        onComplete();
+                    }, 400);
+                }, 2000);
+            }
+
+            finishQuiz() {
+                this.setDynamicTheme('pakistani');
+                document.getElementById('quizView').classList.add('hidden');
+                document.getElementById('resultsView').classList.remove('hidden');
+
+                document.getElementById('orbRevealStage').classList.remove('hidden');
+                document.getElementById('detailedResultsStage').classList.add('hidden');
+
+                SoundFX.playOrbSound();
+
+                this.orbProgress = 10;
+                document.getElementById('orbProgressBar').style.width = '10%';
+                document.getElementById('orbStatusText').innerText = "Analyzing brainwaves... Tap Orb to speed up!";
+
+                clearInterval(this.orbTimer);
+                this.orbTimer = setInterval(() => {
+                    this.orbProgress += 18;
+                    document.getElementById('orbProgressBar').style.width = `${this.orbProgress}%`;
+                    if (this.orbProgress >= 100) {
+                        clearInterval(this.orbTimer);
+                        this.showDetailedResults();
+                    }
+                }, 400);
+            }
+
+            accelerateOrbReveal() {
+                SoundFX.playClick();
+                this.orbProgress += 30;
+                document.getElementById('orbProgressBar').style.width = `${Math.min(this.orbProgress, 100)}%`;
+                if (this.orbProgress >= 100) {
+                    clearInterval(this.orbTimer);
+                    this.showDetailedResults();
+                }
+            }
+
+            showDetailedResults() {
+                SoundFX.playFanfare();
+
+                if (typeof confetti === 'function') {
+                    try {
+                        confetti({
+                            particleCount: 160,
+                            spread: 100,
+                            origin: { y: 0.6 }
+                        });
+                    } catch (e) {
+                        console.warn("Confetti skipped:", e);
+                    }
+                }
+
+                document.getElementById('orbRevealStage').classList.add('hidden');
+                document.getElementById('detailedResultsStage').classList.remove('hidden');
+
+                const totalPossible = this.activeQuestionSet.length;
+                const correctCount = this.runAnswers.filter(a => a.isCorrect).length;
+                const perfectionPct = Math.round((correctCount / totalPossible) * 100);
+
+                document.getElementById('resultPlayerName').innerText = `Cosmic score rendered for ${this.playerName}!`;
+                document.getElementById('resTotalScore').innerText = `${this.score} pts`;
+                document.getElementById('resAccuracy').innerText = `${correctCount}/${totalPossible}`;
+
+                let badge = "Novice Contender";
+                if (perfectionPct >= 90) badge = "💎 Absolute Cosmic Perfectionist";
+                else if (perfectionPct >= 75) badge = "🔥 Grand Mastermind";
+                else if (perfectionPct >= 50) badge = "🧠 Smart Competitor";
+
+                document.getElementById('resPerfectionBadge').innerText = `${perfectionPct}% • ${badge}`;
+
+                const critique = resultCritiques[Math.floor(Math.random() * resultCritiques.length)];
+                document.getElementById('resultHumorCritique').innerText = `"${critique}"`;
+
+                document.getElementById('islamicScoreBreakdown').innerText = `${this.categoryScores.islamic}`;
+                document.getElementById('islamicBar').style.width = `${(this.categoryScores.islamic / (totalPossible/3 || 1)) * 100}%`;
+
+                document.getElementById('logicalScoreBreakdown').innerText = `${this.categoryScores.logical}`;
+                document.getElementById('logicalBar').style.width = `${(this.categoryScores.logical / (totalPossible/3 || 1)) * 100}%`;
+
+                document.getElementById('pakistaniScoreBreakdown').innerText = `${this.categoryScores.pakistani}`;
+                document.getElementById('pakistaniBar').style.width = `${(this.categoryScores.pakistani / (totalPossible/3 || 1)) * 100}%`;
+
+                this.renderResultQuestionReviewList();
+
+                this.saveRunRecord({
+                    name: this.playerName,
+                    score: this.score,
+                    accuracy: `${correctCount}/${totalPossible}`,
+                    perfectionPct: perfectionPct,
+                    badge: badge,
+                    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    answers: this.runAnswers
+                });
+            }
+
+            renderResultQuestionReviewList() {
+                const list = document.getElementById('resultQuestionReviewList');
+                list.innerHTML = '';
+                this.runAnswers.forEach((ans, i) => {
+                    const isCorrect = ans.isCorrect;
+                    const item = document.createElement('div');
+                    item.className = `p-3 rounded-xl border text-xs ${isCorrect ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-rose-950/40 border-rose-500/40 text-rose-200'}`;
+                    item.innerHTML = `
+                        <div class="font-bold mb-1">Q${i+1}: ${ans.question}</div>
+                        <div class="text-[11px] opacity-80">Your choice: ${ans.selectedIndex >= 0 ? ans.options[ans.selectedIndex] : 'Time Expired'} | Correct: ${ans.options[ans.correctIndex]}</div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            toggleResultQuestionReview() {
+                SoundFX.playClick();
+                const list = document.getElementById('resultQuestionReviewList');
+                const icon = document.getElementById('toggleReviewIcon');
+                if (list.classList.contains('hidden')) {
+                    list.classList.remove('hidden');
+                    icon.innerText = "▲";
+                } else {
+                    list.classList.add('hidden');
+                    icon.innerText = "▼";
+                }
+            }
+
+            saveRunRecord(record) {
+                try {
+                    let leaderboard = JSON.parse(localStorage.getItem('majlis_leaderboard') || '[]');
+                    leaderboard.push(record);
+                    leaderboard.sort((a, b) => b.score - a.score);
+                    localStorage.setItem('majlis_leaderboard', JSON.stringify(leaderboard));
+                } catch (e) {
+                    console.warn("Storage operation failed:", e);
+                }
+            }
+
+            loadLeaderboard() {
+                try {
+                    return JSON.parse(localStorage.getItem('majlis_leaderboard') || '[]');
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            filterLeaderboard() {
+                const search = (document.getElementById('leaderboardSearchInput')?.value || '').toLowerCase();
+                const sortKey = document.getElementById('leaderboardSortSelect')?.value || 'score';
+                let lb = this.loadLeaderboard();
+
+                if (search) {
+                    lb = lb.filter(item => item.name.toLowerCase().includes(search));
+                }
+
+                if (sortKey === 'perfection') {
+                    lb.sort((a, b) => b.perfectionPct - a.perfectionPct);
+                } else if (sortKey === 'recent') {
+                    lb = lb.reverse();
+                } else {
+                    lb.sort((a, b) => b.score - a.score);
+                }
+
+                this.renderLeaderboardList(lb);
+            }
+
+            renderLeaderboardList(lb) {
+                const container = document.getElementById('leaderboardListContainer');
+                container.innerHTML = '';
+
+                if (lb.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 text-slate-500">
+                            <div class="text-4xl mb-2">📭</div>
+                            <p class="text-xs font-semibold">No matching challenger records found.</p>
+                        </div>
+                    `;
+                } else {
+                    lb.forEach((entry, idx) => {
+                        let medal = `#${idx + 1}`;
+                        if (idx === 0) medal = "🥇";
+                        else if (idx === 1) medal = "🥈";
+                        else if (idx === 2) medal = "🥉";
+
+                        const div = document.createElement('div');
+                        div.className = "p-4 rounded-2xl bg-slate-950/90 border border-slate-800 flex items-center justify-between hover:border-cyan-500/50 transition shadow-inner";
+                        div.innerHTML = `
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 font-black text-amber-400 flex items-center justify-center text-sm shadow">
+                                    ${medal}
+                                </div>
+                                <div>
+                                    <h4 class="font-extrabold text-slate-100 text-sm sm:text-base">${entry.name}</h4>
+                                    <div class="flex items-center space-x-2 text-[11px] text-slate-400">
+                                        <span>📅 ${entry.date}</span>
+                                        <span>•</span>
+                                        <span class="text-emerald-400 font-bold">${entry.badge}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="text-right">
+                                    <div class="font-black text-amber-400 text-base sm:text-lg">${entry.score} pts</div>
+                                    <div class="text-[10px] text-slate-400">Acc: ${entry.accuracy} (${entry.perfectionPct}%)</div>
+                                </div>
+                                <button onclick="app.inspectRun(${idx})" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold transition border border-slate-700 flex items-center space-x-1 shadow">
+                                    <span>🔍 Inspect</span>
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+            }
+
+            openLeaderboard() {
+                SoundFX.playClick();
+                this.filterLeaderboard();
+                document.getElementById('leaderboardModal').classList.remove('hidden');
+            }
+
+            closeLeaderboard() {
+                SoundFX.playClick();
+                document.getElementById('leaderboardModal').classList.add('hidden');
+            }
+
+            inspectRun(index) {
+                SoundFX.playClick();
+                const lb = this.loadLeaderboard();
+                const entry = lb[index];
+                if (!entry) return;
+
+                document.getElementById('inspectPlayerNameTitle').innerText = `${entry.name}'s Run Details`;
+                document.getElementById('inspectPlayerMeta').innerText = `Score: ${entry.score} pts • Perfection: ${entry.perfectionPct}% • Date: ${entry.date}`;
+
+                const container = document.getElementById('inspectQuestionsContainer');
+                container.innerHTML = '';
+
+                entry.answers.forEach((ans, i) => {
+                    const isCorrect = ans.isCorrect;
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-2xl border ${isCorrect ? 'bg-emerald-950/20 border-emerald-800/50' : 'bg-rose-950/20 border-rose-800/50'}`;
+                    
+                    let optionsHtml = '';
+                    ans.options.forEach((optText, oIdx) => {
+                        let optStyle = "text-slate-400 text-xs py-0.5 px-2 rounded";
+                        if (oIdx === ans.correctIndex) {
+                            optStyle = "text-emerald-300 font-bold text-xs py-1 px-2 rounded bg-emerald-950/60 border border-emerald-700/60";
+                        } else if (oIdx === ans.selectedIndex && !isCorrect) {
+                            optStyle = "text-rose-300 font-bold text-xs py-1 px-2 rounded bg-rose-950/60 border border-rose-700/60";
+                        }
+                        optionsHtml += `<div class="${optStyle}">• ${optText}</div>`;
+                    });
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="text-xs font-extrabold text-slate-200">Q${i+1}. ${ans.question}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black ${isCorrect ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/50' : 'bg-rose-950/80 text-rose-400 border border-rose-500/50'}">
+                                ${isCorrect ? 'Correct ✓' : 'Wrong ✗'}
+                            </span>
+                        </div>
+                        <div class="space-y-1 mt-2">
+                            ${optionsHtml}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                document.getElementById('leaderboardModal').classList.add('hidden');
+                document.getElementById('runInspectionModal').classList.remove('hidden');
+            }
+
+            closeRunInspection() {
+                SoundFX.playClick();
+                document.getElementById('runInspectionModal').classList.add('hidden');
+                document.getElementById('leaderboardModal').classList.remove('hidden');
+            }
+
+            promptClearLeaderboard() {
+                SoundFX.playClick();
+                document.getElementById('clearConfirmModal').classList.remove('hidden');
+            }
+
+            cancelClearLeaderboard() {
+                SoundFX.playClick();
+                document.getElementById('clearConfirmModal').classList.add('hidden');
+            }
+
+            confirmClearLeaderboard() {
+                SoundFX.playClick();
+                try {
+                    localStorage.removeItem('majlis_leaderboard');
+                } catch (e) {}
+                document.getElementById('clearConfirmModal').classList.add('hidden');
+                this.openLeaderboard();
+            }
+
+            toggleSound() {
+                SoundFX.enabled = !SoundFX.enabled;
+                document.getElementById('soundStatus').innerText = SoundFX.enabled ? "Sound On" : "Sound Off";
+                document.getElementById('soundIcon').innerText = SoundFX.enabled ? "🔊" : "🔇";
+                SoundFX.playClick();
+            }
+        }
+
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                app = new TriviaApp();
+                const space = new CosmicSpaceSystemCanvas();
+                space.animate();
+            } catch (err) {
+                console.error("Initialization error:", err);
+            }
+        });
+    </script>
+</body>
+</html>
